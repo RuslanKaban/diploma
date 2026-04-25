@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import styles from './Product.module.css';
 import { FaShoppingBag } from 'react-icons/fa';
+import { useCart } from '../../context/CartContext';
 
 type Category = {
   id: number;
@@ -32,6 +33,13 @@ type Product = {
   Category?: Category;
   Sizes?: Size[];
   Colors?: Color[];
+};
+
+type Review = {
+  id: number;
+  author: string;
+  rating: number;
+  text: string;
 };
 
 const genderMap: Record<string, string> = {
@@ -76,10 +84,77 @@ const getImageFilterClass = (color: string) => {
 
 const ProductPage = () => {
   const { id } = useParams();
+  const { addToCart } = useCart();
   const [product, setProduct] = useState<Product | null>(null);
   const [similarProducts, setSimilarProducts] = useState<Product[]>([]);
   const [selectedSize, setSelectedSize] = useState<string>('');
   const [selectedColor, setSelectedColor] = useState<string>('');
+
+  const [reviews, setReviews] = useState<Review[]>([
+    {
+      id: 1,
+      author: 'В. Петрова',
+      rating: 5,
+      text: 'Сидит свободно, ткань плотная. После стирки форма не ушла.',
+    },
+    {
+      id: 2,
+      author: 'DamskiyUgodnik217',
+      rating: 4,
+      text: 'Выглядит стильно, но материал чуть плотнее, чем ожидала.',
+    },
+  ]);
+
+  const [reviewAuthor, setReviewAuthor] = useState('');
+  const [reviewText, setReviewText] = useState('');
+  const [reviewRating, setReviewRating] = useState('5');
+  const [showAllReviews, setShowAllReviews] = useState(false);
+
+  const handleAddReview = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!reviewAuthor.trim() || !reviewText.trim()) {
+      return;
+    }
+
+    const newReview: Review = {
+      id: Date.now(),
+      author: reviewAuthor,
+      rating: Number(reviewRating),
+      text: reviewText,
+    };
+
+    setReviews([newReview, ...reviews]);
+
+    setReviewAuthor('');
+    setReviewText('');
+    setReviewRating('5');
+  };
+
+  const averageRating =
+    reviews.length > 0
+      ? (
+        reviews.reduce((sum, r) => sum + r.rating, 0) /
+        reviews.length
+      ).toFixed(1)
+      : '0.0';
+
+  const visibleReviews = showAllReviews
+    ? reviews
+    : reviews.slice(0, 4);
+
+  const handleAddToCart = () => {
+    if (!product) return;
+
+    addToCart({
+      id: product.id,
+      title: product.title,
+      price: product.price,
+      image: product.image,
+      size: selectedSize,
+      color: selectedColor,
+    });
+  };
 
   useEffect(() => {
     fetch(`/api/products/${id}`)
@@ -113,6 +188,8 @@ const ProductPage = () => {
   if (!product) {
     return <div className={styles.loading}>Загрузка...</div>;
   }
+
+
 
   return (
     <section className={styles.page}>
@@ -210,7 +287,9 @@ const ProductPage = () => {
             <p className={styles.price}>{product.price}.00 руб.</p>
 
             <div className={styles.actions}>
-              <button className={styles.cartButton}>В КОРЗИНУ</button>
+              <button className={styles.cartButton} onClick={handleAddToCart}>
+                В КОРЗИНУ
+              </button>
               <button className={styles.iconButton}>
                 <FaShoppingBag />
               </button>
@@ -228,26 +307,64 @@ const ProductPage = () => {
         <div className={styles.reviewsBlock}>
           <div className={styles.reviewsTop}>
             <span className={styles.reviewsTitle}>ОТЗЫВЫ</span>
-            <button className={styles.ratingButton}>4.8 ★</button>
+            <button className={styles.ratingButton}>
+              {averageRating} ★ ({reviews.length})
+            </button>
             <button className={styles.sortButton}>САМЫЕ НОВЫЕ</button>
           </div>
 
+          <form className={styles.reviewForm} onSubmit={handleAddReview}>
+            <input
+              className={styles.reviewInput}
+              type="text"
+              placeholder="Ваше имя"
+              value={reviewAuthor}
+              onChange={(e) => setReviewAuthor(e.target.value)}
+            />
+
+            <select
+              className={styles.reviewSelect}
+              value={reviewRating}
+              onChange={(e) => setReviewRating(e.target.value)}
+            >
+              <option value="5">5 ★</option>
+              <option value="4">4 ★</option>
+              <option value="3">3 ★</option>
+              <option value="2">2 ★</option>
+              <option value="1">1 ★</option>
+            </select>
+
+            <textarea
+              className={styles.reviewTextarea}
+              placeholder="Напишите отзыв"
+              value={reviewText}
+              onChange={(e) => setReviewText(e.target.value)}
+            />
+
+            <button className={styles.reviewSubmit} type="submit">
+              ОТПРАВИТЬ
+            </button>
+          </form>
+
           <div className={styles.reviewsList}>
-            <div className={styles.reviewCard}>
-              <p className={styles.reviewAuthor}>Валентина П.</p>
-              <p className={styles.reviewStars}>★★★★★</p>
-              <p className={styles.reviewText}>Футболка суперская, ношу с удовольствием</p>
-            </div>
-
-            <div className={styles.reviewCard}>
-              <p className={styles.reviewAuthor}>DamskiyUgodnik217</p>
-              <p className={styles.reviewStars}>★</p>
-              <p className={styles.reviewText}>У конкурентов круче, фууууу</p>
-            </div>
-
-            <button className={styles.moreReviews}>ЕЩЕ</button>
+            {visibleReviews.map((review) => (
+              <div key={review.id} className={styles.reviewCard}>
+                <p className={styles.reviewAuthor}>{review.author}</p>
+                <p className={styles.reviewStars}>{'★'.repeat(review.rating)}</p>
+                <p className={styles.reviewText}>{review.text}</p>
+              </div>
+            ))}
           </div>
         </div>
+
+        {reviews.length > 4 && (
+          <button
+            className={styles.moreReviews}
+            onClick={() => setShowAllReviews(!showAllReviews)}
+          >
+            {showAllReviews ? 'СВЕРНУТЬ' : 'ЕЩЁ'}
+          </button>
+        )}
 
         <div className={styles.similarBlock}>
           <h2 className={styles.sectionTitle}>ПОХОЖИЕ ТОВАРЫ</h2>

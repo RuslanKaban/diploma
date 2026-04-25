@@ -1,35 +1,37 @@
-import styles from "./Header.module.css"
+import styles from "./Header.module.css";
 import { FaShoppingCart, FaRegUser, FaSearch } from "react-icons/fa";
+import { Link } from "react-router-dom";
 
 const Header = () => {
+  return (
+    <header className={styles.header}>
+      
+      <Link to="/" className={styles.logo}>
+        TUR
+      </Link>
 
-    return (
-        <header className={styles.header}>
-            <div className={styles.logo}>TUR</div>
+      <div className={styles.search}>
+        <input type="text" placeholder="Поиск" />
+        <FaSearch className={styles.searchIcon} />
+      </div>
 
-            <div className={styles.search}>
-                <input type="text" placeholder="Поиск" />
-                <FaSearch className={styles.searchIcon} />
+      <nav className={styles.nav}>
+        <Link to="/about" className={styles.link}>О НАС</Link>
+        <Link to="/categories" className={styles.link}>КАТАЛОГ</Link>
+        <Link to="/delivery" className={styles.link}>ДОСТАВКА</Link>
 
-            </div>
+        <div className={styles.icons}>
+          <Link to="/cart" className={styles.iconCircle}>
+            <FaShoppingCart size={20} />
+          </Link>
 
-            <nav className={styles.nav}>
-                <a href="/about">О НАС</a>
-                <a href="/catalog">КАТАЛОГ</a>
-                <a href="/delivery">ДОСТАВКА</a>
-
-                <div className={styles.icons}>
-                    <div className={styles.iconCircle}>
-                        <FaShoppingCart size={24} />
-                    </div>
-                    <div className={styles.iconCircle}>
-                        <FaRegUser size={24} />
-                    </div>
-                </div>
-            </nav>
-        </header>
-    );
+          <Link to="/profile" className={styles.iconCircle}>
+            <FaRegUser size={20} />
+          </Link>
+        </div>
+      </nav>
+    </header>
+  );
 };
 
-
-export default Header
+export default Header;

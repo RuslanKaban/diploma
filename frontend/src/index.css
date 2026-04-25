@@ -1,0 +1,11 @@
+:root {
+  --primary-color: #FFA600;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
