@@ -1,0 +1,17 @@
+{
+  "name": "clothes",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+  "start": "concurrently \"npm run dev --prefix server\" \"npm run dev --prefix frontend\"",
+    "front": "npm run dev --prefix frontend",
+    "back": "npm run dev --prefix backend"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}

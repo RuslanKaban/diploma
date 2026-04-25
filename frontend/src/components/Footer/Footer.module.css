@@ -1,0 +1,53 @@
+.footer {
+  display: grid;
+  grid-template-columns: 1fr 2fr; 
+  gap: 40px;
+  padding: 40px;
+  background-color: var(--primary-color);
+  color: #fff;
+  font-family: 'inter', sans-serif;
+}
+
+
+.left {
+  gap: 15px;
+}
+
+.title {
+  font-size: 20px;
+  font-weight: 600;
+}
+.socialIcons {
+  display: flex;
+  gap: 15px;
+}
+
+.socialIcons a {
+  color: #fff;
+  transition: 0.2s;
+}
+
+.socialIcons a:hover {
+  opacity: 0.8;
+}
+
+.right {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.right a {
+  color: #fff;
+  text-decoration: none;
+}
+
+.right a:hover {
+    opacity: 0.8;
+}
+
+.support {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+}
