@@ -290,9 +290,9 @@ const ProductPage = () => {
               <button className={styles.cartButton} onClick={handleAddToCart}>
                 В КОРЗИНУ
               </button>
-              <button className={styles.iconButton}>
-                <FaShoppingBag />
-              </button>
+            <Link to="/cart" className={styles.iconButton}>
+                  <FaShoppingBag />
+            </Link>
             </div>
           </div>
         </div>

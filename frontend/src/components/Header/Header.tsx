@@ -18,7 +18,7 @@ const Header = () => {
       <nav className={styles.nav}>
         <Link to="/about" className={styles.link}>О НАС</Link>
         <Link to="/categories" className={styles.link}>КАТАЛОГ</Link>
-        <Link to="/delivery" className={styles.link}>ДОСТАВКА</Link>
+        <Link to="/checkout" className={styles.link}>ДОСТАВКА</Link>
 
         <div className={styles.icons}>
           <Link to="/cart" className={styles.iconCircle}>

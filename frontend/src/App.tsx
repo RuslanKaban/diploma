@@ -6,6 +6,7 @@ import Cart from "./pages/Cart/Cart";
 import CategoriesPage from "./pages/Categories/CategoriesPage";
 import CategoryProductsPage from "./pages/CategoryProduct/categoryProduct";
 import Product from "./pages/Product/Product";
+import Checkout from "./pages/Checkout/Checkout";
 
 import "./App.css";
 
@@ -23,6 +24,7 @@ function App() {
           <Route path="product/:id" element={<Product />} />
           <Route path="catalog" element={<Catalog />} />
           <Route path="cart" element={<Cart />} />
+          <Route path="checkout" element={<Checkout />} />
         </Route>
       </Routes>
     </div>
