@@ -1,6 +1,43 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../models');
+const { Op } = require('sequelize'); 
+
+router.get('/search', async (req, res) => {
+  try {
+    const { query } = req.query;
+
+    if (!query) {
+      return res.json([]);
+    }
+
+    const products = await db.Product.findAll({
+      where: {
+        [Op.or]: [
+          { title: { [Op.like]: `%${query}%` } },
+          { brand: { [Op.like]: `%${query}%` } },
+          { description: { [Op.like]: `%${query}%` } },
+        ],
+      },
+      include: [
+        db.Category,
+        {
+          model: db.Color,
+          through: { attributes: [] },
+        },
+        {
+          model: db.Size,
+          through: { attributes: [] },
+        },
+      ],
+    });
+
+    res.json(products);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Ошибка поиска товаров' });
+  }
+});
 
 router.get('/', async (req, res) => {
   try {

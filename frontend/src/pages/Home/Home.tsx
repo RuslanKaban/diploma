@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+
 import styles from './Home.module.css';
 import heroImg from '../../assets/heroImg.png';
 import men from '../../assets/men.png';
@@ -30,7 +31,7 @@ const Home = () => {
         </div>
 
         <button onClick={() => navigate('/categories')} className={styles.hero__button}>
-          Перейти к покупкам 
+          Перейти к покупкам
         </button>
       </section>
 
@@ -40,23 +41,50 @@ const Home = () => {
         </h2>
 
         <ul className={styles.fresh__list}>
-          <li className={styles.fresh__item}>
+          <li
+            className={styles.fresh__item}
+            onClick={() => navigate('/categories/men')}
+          >
             <img src={men} alt="Мужчины" />
-            <button className={styles.fresh__button}>
+            <button
+              className={styles.fresh__button}
+              onClick={(e) => {
+                e.stopPropagation(); // 🔥 чтобы не было двойного клика
+                navigate('/categories/men');
+              }}
+            >
               Мужчины
             </button>
           </li>
 
-          <li className={styles.fresh__item}>
+          <li
+            className={styles.fresh__item}
+            onClick={() => navigate('/categories/women')}
+          >
             <img src={women} alt="Женщины" />
-            <button className={styles.fresh__button}>
+            <button
+              className={styles.fresh__button}
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate('/categories/women');
+              }}
+            >
               Женщины
             </button>
           </li>
 
-          <li className={styles.fresh__item}>
+          <li
+            className={styles.fresh__item}
+            onClick={() => navigate('/categories/unisex')}
+          >
             <img src={unisex} alt="Унисекс" />
-            <button className={styles.fresh__button}>
+            <button
+              className={styles.fresh__button}
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate('/categories/unisex');
+              }}
+            >
               Унисекс
             </button>
           </li>
@@ -65,40 +93,53 @@ const Home = () => {
 
       <section className={styles.categories}>
         <h2 className={styles.categories__title}>КАТЕГОРИИ ДЛЯ МУЖЧИН</h2>
+
         <div className={styles.categories__block}>
           <div className={styles.categories__grid}>
-            <a href="/men/outerwear" className={styles.categories__card}>
+            <div className={styles.categories__card} onClick={() => navigate('/category/men/outerwear')}>
               <img src={menOuterwear} alt="Верхняя одежда" />
               <span className={styles.categories__label}>ВЕРХНЯЯ ОДЕЖДА</span>
-            </a>
-            <a href="/men/tshirts" className={styles.categories__card}>
+            </div>
+
+            <div className={styles.categories__card} onClick={() => navigate('/category/men/tshirts')}>
               <img src={menTshirts} alt="Футболки" />
               <span className={styles.categories__label}>ФУТБОЛКИ</span>
-            </a>
-            <a href="/men/jeans" className={styles.categories__card}>
+            </div>
+
+            <div className={styles.categories__card} onClick={() => navigate('/category/men/jeans')}>
               <img src={menJeans} alt="Джинсы" />
               <span className={styles.categories__label}>ДЖИНСЫ</span>
-            </a>
+            </div>
           </div>
-          <button className={styles.categories__more}>БОЛЬШЕ &rarr;</button>
+
+          <button className={styles.categories__more} onClick={() => navigate('/categories/men')}>
+            БОЛЬШЕ →
+          </button>
         </div>
+
         <h2 className={styles.categories__title}>КАТЕГОРИИ ДЛЯ ЖЕНЩИН</h2>
+
         <div className={styles.categories__block}>
           <div className={styles.categories__grid}>
-            <a href="/women/outerwear" className={styles.categories__card}>
+            <div className={styles.categories__card} onClick={() => navigate('/category/women/outerwear')}>
               <img src={womenOuterwear} alt="Верхняя одежда" />
               <span className={styles.categories__label}>ВЕРХНЯЯ ОДЕЖДА</span>
-            </a>
-            <a href="/women/tshirts" className={styles.categories__card}>
+            </div>
+
+            <div className={styles.categories__card} onClick={() => navigate('/category/women/tshirts')}>
               <img src={womenTshirts} alt="Футболки" />
               <span className={styles.categories__label}>ФУТБОЛКИ</span>
-            </a>
-            <a href="/women/jeans" className={styles.categories__card}>
+            </div>
+
+            <div className={styles.categories__card} onClick={() => navigate('/category/women/jeans')}>
               <img src={womenJeans} alt="Джинсы" />
               <span className={styles.categories__label}>ДЖИНСЫ</span>
-            </a>
+            </div>
           </div>
-          <button className={styles.categories__more}>БОЛЬШЕ &rarr;</button>
+
+          <button className={styles.categories__more} onClick={() => navigate('/categories/women')}>
+            БОЛЬШЕ →
+          </button>
         </div>
       </section>
     </div>

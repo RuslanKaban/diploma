@@ -1,8 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useCart } from '../../context/CartContext';
 import { IMaskInput } from 'react-imask';
 import { useNavigate } from 'react-router-dom';
 import styles from './Checkout.module.css';
+
+import cdekIcon from '../../assets/map/cdek.png';
+import postIcon from '../../assets/map/post.png';
 
 const Checkout = () => {
   const navigate = useNavigate();
@@ -11,12 +14,16 @@ const Checkout = () => {
 
   const [delivery, setDelivery] = useState('courier');
   const [payment, setPayment] = useState('card');
+
   const [address, setAddress] = useState({
     city: '',
     street: '',
     house: '',
     apartment: '',
   });
+
+  const [selectedPoint, setSelectedPoint] = useState('');
+  const [activeStep, setActiveStep] = useState<'cart' | 'checkout'>('checkout');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isPaying, setIsPaying] = useState(false);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
@@ -30,7 +37,56 @@ const Checkout = () => {
     email: '',
   });
 
+  useEffect(() => {
+    if (delivery === 'courier') return;
 
+    // @ts-ignore
+    if (!window.ymaps) return;
+
+    // @ts-ignore
+    window.ymaps.ready(() => {
+      const mapElement = document.getElementById('map');
+
+      if (!mapElement || mapElement.childNodes.length > 0) return;
+
+      // @ts-ignore
+      const map = new window.ymaps.Map('map', {
+        center: [43.1155, 131.8855],
+        zoom: 11,
+      });
+
+      const points = [
+        { coords: [43.119195, 131.884736], name: 'СДЭК — Мордовцева 3', type: 'cdek' },
+        { coords: [43.115011, 131.890352], name: 'Почта — Светланская 41', type: 'post' },
+        { coords: [43.113556, 131.895429], name: 'СДЭК — Светланская 56', type: 'cdek' },
+        { coords: [43.128266, 131.896381], name: 'СДЭК — Проспект Красного знамени 34', type: 'cdek' },
+      ];
+
+      points.forEach((point) => {
+        const icon = point.type === 'cdek' ? cdekIcon : postIcon;
+
+        // @ts-ignore
+        const placemark = new window.ymaps.Placemark(
+          point.coords,
+          {
+            balloonContent: point.name,
+          },
+          {
+            iconLayout: 'default#image',
+            iconImageHref: icon,
+            iconImageSize: [32, 32],
+            iconImageOffset: [-16, -32],
+          }
+        );
+
+        placemark.events.add('click', () => {
+          setSelectedPoint(point.name);
+        });
+
+        map.geoObjects.add(placemark);
+      });
+    });
+  }, [delivery]);
 
   const validate = () => {
     const newErrors: Record<string, boolean> = {};
@@ -40,19 +96,26 @@ const Checkout = () => {
     if (!form.firstName.trim()) newErrors.firstName = true;
     if (!form.phone.trim() || form.phone.length < 18) newErrors.phone = true;
     if (!emailRegex.test(form.email)) newErrors.email = true;
+
     if (delivery === 'courier') {
       if (!address.city.trim()) newErrors.city = true;
       if (!address.street.trim()) newErrors.street = true;
       if (!address.house.trim()) newErrors.house = true;
     }
+
+    if (delivery !== 'courier' && !selectedPoint) {
+      newErrors.selectedPoint = true;
+    }
+
     setErrors(newErrors);
 
     return Object.keys(newErrors).length === 0;
   };
 
   const isDeliveryValid =
-    delivery !== 'courier' ||
-    (address.city.trim() && address.street.trim() && address.house.trim());
+    delivery === 'courier'
+      ? address.city.trim() && address.street.trim() && address.house.trim()
+      : selectedPoint;
 
   const isFormValid =
     form.lastName.trim() &&
@@ -74,7 +137,7 @@ const Checkout = () => {
       createdAt: new Date().toISOString(),
       deliveryDetails: {
         type: delivery,
-        address: delivery === 'courier' ? address : null,
+        address: delivery === 'courier' ? address : selectedPoint,
       },
     };
 
@@ -98,13 +161,30 @@ const Checkout = () => {
   };
 
   return (
+
     <section className={styles.checkout}>
       <div className={styles.container}>
+        <div className={styles.toggleWrapper}>
+          <div className={styles.toggleButtons}>
+            <button
+              className={styles.stepButton}
+              onClick={() => navigate('/cart')}
+            >
+              КОРЗИНА
+            </button>
 
-        {/* ДОСТАВКА */}
+            <span className={styles.separator}>\</span>
+
+            <button className={`${styles.stepButton} ${styles.stepButtonActive}`}>
+              ДОСТАВКА
+            </button>
+          </div>
+        </div>
+
         <div className={styles.step}>
-          <h2><span>ЭТАП 1</span> УКАЖИТЕ ТИП ДОСТАВКИ</h2>
-
+          <h2>
+            <span>ЭТАП 1</span> УКАЖИТЕ ТИП ДОСТАВКИ
+          </h2>
           <div className={styles.deliveryBlock}>
             <div className={styles.deliveryOptions}>
               <button
@@ -117,7 +197,10 @@ const Checkout = () => {
 
               <button
                 className={delivery === 'post' ? styles.active : ''}
-                onClick={() => setDelivery('post')}
+                onClick={() => {
+                  setDelivery('post');
+                  setSelectedPoint('');
+                }}
               >
                 <span>ПОЧТА</span>
                 <small>БЕСПЛАТНО</small>
@@ -125,7 +208,10 @@ const Checkout = () => {
 
               <button
                 className={delivery === 'pickup' ? styles.active : ''}
-                onClick={() => setDelivery('pickup')}
+                onClick={() => {
+                  setDelivery('pickup');
+                  setSelectedPoint('');
+                }}
               >
                 <span>ПУНКТ ВЫДАЧИ</span>
                 <small>БЕСПЛАТНО</small>
@@ -141,7 +227,8 @@ const Checkout = () => {
                     onChange={(e) =>
                       setAddress({ ...address, city: e.target.value })
                     }
-                    className={`${styles.input} ${errors.city ? styles.error : ''}`}
+                    className={`${styles.input} ${errors.city ? styles.error : ''
+                      }`}
                   />
 
                   <input
@@ -150,7 +237,8 @@ const Checkout = () => {
                     onChange={(e) =>
                       setAddress({ ...address, street: e.target.value })
                     }
-                    className={`${styles.input} ${errors.street ? styles.error : ''}`}
+                    className={`${styles.input} ${errors.street ? styles.error : ''
+                      }`}
                   />
 
                   <input
@@ -159,7 +247,8 @@ const Checkout = () => {
                     onChange={(e) =>
                       setAddress({ ...address, house: e.target.value })
                     }
-                    className={`${styles.input} ${errors.house ? styles.error : ''}`}
+                    className={`${styles.input} ${errors.house ? styles.error : ''
+                      }`}
                   />
 
                   <input
@@ -172,17 +261,29 @@ const Checkout = () => {
                   />
                 </div>
               ) : (
-                <div className={styles.map}>
-                  <span>ВЫБЕРИТЕ ПУНКТ НА КАРТЕ</span>
-                </div>
+                <>
+                  <div
+                    className={`${styles.map} ${errors.selectedPoint ? styles.error : ''
+                      }`}
+                  >
+                    <div id="map" className={styles.mapInner} />
+                  </div>
+
+                  {selectedPoint && (
+                    <p className={styles.selectedPoint}>
+                      Выбран: {selectedPoint}
+                    </p>
+                  )}
+                </>
               )}
             </div>
           </div>
         </div>
 
-        {/* ФОРМА */}
         <div className={styles.step}>
-          <h2><span>ЭТАП 2</span> ЛИЧНЫЕ ДАННЫЕ</h2>
+          <h2>
+            <span>ЭТАП 2</span> ЛИЧНЫЕ ДАННЫЕ
+          </h2>
 
           <div className={styles.formGrid}>
             <input
@@ -191,7 +292,8 @@ const Checkout = () => {
               onChange={(e) =>
                 setForm({ ...form, lastName: e.target.value })
               }
-              className={`${styles.input} ${errors.lastName ? styles.error : ''}`}
+              className={`${styles.input} ${errors.lastName ? styles.error : ''
+                }`}
             />
 
             <input
@@ -200,7 +302,8 @@ const Checkout = () => {
               onChange={(e) =>
                 setForm({ ...form, firstName: e.target.value })
               }
-              className={`${styles.input} ${errors.firstName ? styles.error : ''}`}
+              className={`${styles.input} ${errors.firstName ? styles.error : ''
+                }`}
             />
 
             <input
@@ -216,27 +319,26 @@ const Checkout = () => {
               mask="+{7} (000) 000-00-00"
               placeholder="ТЕЛЕФОН"
               value={form.phone}
-              onAccept={(value) =>
-                setForm({ ...form, phone: value })
-              }
-              className={`${styles.input} ${errors.phone ? styles.error : ''}`}
+              onAccept={(value) => setForm({ ...form, phone: String(value) })}
+              className={`${styles.input} ${errors.phone ? styles.error : ''
+                }`}
             />
 
             <input
               type="email"
               placeholder="EMAIL"
               value={form.email}
-              onChange={(e) =>
-                setForm({ ...form, email: e.target.value })
-              }
-              className={`${styles.input} ${errors.email ? styles.error : ''}`}
+              onChange={(e) => setForm({ ...form, email: e.target.value })}
+              className={`${styles.input} ${errors.email ? styles.error : ''
+                }`}
             />
           </div>
         </div>
 
-        {/* ОПЛАТА */}
         <div className={styles.step}>
-          <h2><span>ЭТАП 3</span> ОПЛАТА</h2>
+          <h2>
+            <span>ЭТАП 3</span> ОПЛАТА
+          </h2>
 
           <div className={styles.paymentOptions}>
             <button
@@ -261,9 +363,7 @@ const Checkout = () => {
         </div>
 
         {totalCount === 0 && (
-          <p className={styles.emptyCartText}>
-            Корзина пуста
-          </p>
+          <p className={styles.emptyCartText}>Корзина пуста</p>
         )}
 
         <button
@@ -277,6 +377,13 @@ const Checkout = () => {
         {isPaymentModalOpen && (
           <div className={styles.modalOverlay}>
             <div className={styles.modal}>
+              <button
+                className={styles.closeButton}
+                onClick={() => setIsPaymentModalOpen(false)}
+              >
+                ✕
+              </button>
+
               <h2>ОПЛАТА КАРТОЙ</h2>
 
               <input placeholder="Номер карты" className={styles.input} />
@@ -292,13 +399,6 @@ const Checkout = () => {
               >
                 ОПЛАТИТЬ {totalPrice} ₽
               </button>
-
-              <button
-                className={styles.closeButton}
-                onClick={() => setIsPaymentModalOpen(false)}
-              >
-                ✕
-              </button>
             </div>
           </div>
         )}
@@ -306,11 +406,7 @@ const Checkout = () => {
         {isModalOpen && (
           <div className={styles.modalOverlay}>
             <div className={styles.modal}>
-              <h2>
-                {payment === 'card'
-                  ? 'ОПЛАТА ПРОШЛА'
-                  : 'ЗАКАЗ ПРИНЯТ'}
-              </h2>
+              <h2>{payment === 'card' ? 'ОПЛАТА ПРОШЛА' : 'ЗАКАЗ ПРИНЯТ'}</h2>
 
               <p>Спасибо за покупку!</p>
 

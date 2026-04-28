@@ -96,6 +96,13 @@
   position: relative;
   width: 555px;
   height: 400px;
+  cursor: pointer;
+}
+
+.fresh__item a {
+  display: block;
+  text-decoration: none;
+  color: inherit;
 }
 
 .fresh__item img {
@@ -162,6 +169,7 @@
   overflow: hidden;
   border-radius: 16px;
   margin-bottom: 20px;
+  cursor: pointer;
 }
 
 .categories__card img {

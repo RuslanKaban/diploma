@@ -7,8 +7,10 @@ import CategoriesPage from "./pages/Categories/CategoriesPage";
 import CategoryProductsPage from "./pages/CategoryProduct/categoryProduct";
 import Product from "./pages/Product/Product";
 import Checkout from "./pages/Checkout/Checkout";
-
+import About from "./pages/About/about";
+import SearchPage from "./pages/Search/SearchPage";
 import "./App.css";
+
 
 function App() {
   const location = useLocation();
@@ -25,6 +27,9 @@ function App() {
           <Route path="catalog" element={<Catalog />} />
           <Route path="cart" element={<Cart />} />
           <Route path="checkout" element={<Checkout />} />
+          <Route path="about" element={<About />} />
+          <Route path="search" element={<SearchPage />} />
+          
         </Route>
       </Routes>
     </div>

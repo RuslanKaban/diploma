@@ -31,13 +31,26 @@
   color: #e2e2e2;
 }
 
-.searchIcon {
+.searchButton {
   position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: none;
+  background: transparent;
+  color: #e2e2e2;
+  cursor: pointer;
+  padding: 0;
+}
+
+.searchIcon {
+  width: 20px;
+  height: 20px;
   right: 12px;             
   top: 50%;
-  transform: translateY(-50%); 
   color: #e2e2e2;
-  pointer-events: none;      
+  pointer-events: none;   
+  display: block;   
 }
 
 .nav {
